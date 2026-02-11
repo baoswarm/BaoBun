@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/baoswarm/baobun/internal/config"
+	"github.com/baoswarm/baobun/internal/debugs"
 	"github.com/baoswarm/baobun/pkg/protocol"
 )
 
@@ -46,6 +48,8 @@ func NewTransferUnitManager(swarm *Swarm, numTransferUnits uint64) *TransferUnit
 	}
 
 	go pm.run()
+	go pm.scheduleDownloads()
+
 	return pm
 }
 
@@ -60,7 +64,6 @@ func (pm *TransferUnitManager) run() {
 
 		case <-ticker.C:
 			pm.checkTimeouts()
-			pm.scheduleDownloads()
 		}
 	}
 }
@@ -86,6 +89,8 @@ func (pm *TransferUnitManager) handleTransferUnitComplete(index uint64) {
 		pm.cleanupRequest(index, req.From)
 	}
 
+	pm.tryScheduleOneLocked()
+
 	log.Printf("TransferUnit %d download complete", index)
 }
 
@@ -94,7 +99,7 @@ func (pm *TransferUnitManager) checkTimeouts() {
 	defer pm.mu.Unlock()
 
 	now := time.Now()
-	timeout := 30 * time.Second
+	timeout := config.TransferRequestTimeout
 
 	for idx, req := range pm.activeRequests {
 		if now.Sub(req.SentAt) > timeout {
@@ -106,6 +111,10 @@ func (pm *TransferUnitManager) checkTimeouts() {
 			if unit.State == TransferUnitStateDownloading {
 				unit.State = TransferUnitStateMissing
 			}
+
+			pm.tryScheduleOneLocked()
+
+			debugs.NumTransferResponseAwaitTimeout++
 
 			req.Attempts++
 		}
@@ -134,13 +143,14 @@ func (pm *TransferUnitManager) scheduleDownloads() {
 	pm.mu.Lock()
 	defer pm.mu.Unlock()
 
-	const (
-		maxActiveRequests  = 64
-		maxRequestsPerPeer = 8
-	)
+	for pm.tryScheduleOneLocked() {
+		// keep filling until window full or no candidates
+	}
+}
 
-	if len(pm.activeRequests) >= maxActiveRequests {
-		return
+func (pm *TransferUnitManager) tryScheduleOneLocked() bool {
+	if len(pm.activeRequests) >= config.ActiveTransfersTotal {
+		return false
 	}
 
 	//TODO: rarest first mode
@@ -165,19 +175,18 @@ func (pm *TransferUnitManager) scheduleDownloads() {
 		candidates[i], candidates[j] = candidates[j], candidates[i]
 	})
 	for _, unitIdx := range candidates {
-		peer := pm.selectPeerForTransferUnit(unitIdx, maxRequestsPerPeer)
+		peer := pm.selectPeerForTransferUnit(unitIdx, config.ActiveTransfersPerPeer)
 		if peer == "" {
 			continue
 		}
 
 		if pm.sendTransferUnitRequest(unitIdx, peer) {
 			log.Printf("Requested transferUnit %d from %s", unitIdx, peer)
-		}
-
-		if len(pm.activeRequests) >= maxActiveRequests {
-			return
+			return true
 		}
 	}
+
+	return false // no schedulable unit found
 
 	//TODO: sequential mode
 	// for unitIdx := uint64(0); unitIdx < pm.transferUnitCount; unitIdx++ {
@@ -204,6 +213,13 @@ func (pm *TransferUnitManager) scheduleDownloads() {
 	// 		return
 	// 	}
 	// }
+}
+
+func (pm *TransferUnitManager) tryScheduleOne() {
+	pm.mu.Lock()
+	defer pm.mu.Unlock()
+
+	pm.tryScheduleOneLocked()
 }
 
 func (pm *TransferUnitManager) selectPeerForTransferUnit(unit uint64, maxPerPeer int) protocol.NodeKey {

@@ -24,7 +24,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/itchyny/base58-go v0.2.2 // indirect
-	github.com/nknorg/ncp-go v1.0.7-0.20240928081416-1a805ec168d0 // indirect
+	github.com/nknorg/ncp-go v1.0.7-0.20240928081416-1a805ec168d0
 	github.com/nknorg/nkn/v2 v2.2.5 // indirect
 	github.com/nknorg/nkngomobile v0.0.0-20220615081414-671ad1afdfa9 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect

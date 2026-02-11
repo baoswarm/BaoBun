@@ -97,14 +97,35 @@ func (c *Client) ReannounceAllSwarms(
 		}
 
 		for _, tracker := range swarm.File.Trackers {
-			_, err := c.Transport.Announce(ctx, tracker, req)
+			resp, err := c.Transport.Announce(ctx, tracker, req)
 			if err != nil {
 				log.Printf("announce failed (%s): %v", tracker, err)
 				continue
 			}
+			for _, peer := range resp.Peers {
+				if peer.NodeKey == protocol.NodeKey(c.NodeKey) {
+					continue
+				}
+
+				// Check if peer already exists
+				swarm.mu.RLock()
+				ph, exists := swarm.Peers[peer.NodeKey]
+				swarm.mu.RUnlock()
+
+				if exists && ph.state != protocol.StateClosed {
+					continue
+				}
+
+				// Connect in background with proper synchronization
+				go func(p protocol.NodeKey) {
+					c.ConnectPeer(swarm, p)
+				}(peer.NodeKey)
+			}
+
 			log.Printf(
-				"reannounced to %s",
+				"announced to %s → %d new peers",
 				tracker,
+				len(resp.Peers),
 			)
 		}
 	}

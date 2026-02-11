@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/baoswarm/baobun/internal/debugs"
 	"github.com/baoswarm/baobun/pkg/protocol"
 )
 
@@ -220,6 +221,7 @@ func (ph *PeerHandler) HandleMessage(msg protocol.PeerMessage) {
 
 		// Notify swarm about updated bitfield
 		ph.Swarm.UpdatePeerBitfield(ph.Peer, ph.Bitfield)
+		ph.Swarm.TransferUnitManager.scheduleDownloads()
 
 	case protocol.MsgHave:
 		var have protocol.HavePayload
@@ -244,8 +246,11 @@ func (ph *PeerHandler) HandleMessage(msg protocol.PeerMessage) {
 			return
 		}
 
+		debugs.NumTransferRequestReceived++
+		debugs.LogNums()
+
 		// Handle incoming transferUnit request (if we have the transferUnit)
-		go ph.handleIncomingRequest(req.UnitIndex)
+		ph.handleIncomingRequest(req.UnitIndex)
 
 	case protocol.MsgTransfer:
 		var transferUnit protocol.TransferPayload
@@ -347,6 +352,9 @@ func (ph *PeerHandler) SendTransferUnitRequest(transferUnitIndex uint64) error {
 		return fmt.Errorf("failed to marshal transferUnit request: %w", err)
 	}
 
+	debugs.NumTransferRequestSend++
+	debugs.LogNums()
+
 	return ph.Send(protocol.PeerMessage{
 		InfoHash: ph.Swarm.InfoHash,
 		Type:     protocol.MsgRequest,
@@ -420,6 +428,10 @@ func (ph *PeerHandler) SendTransferUnit(transferUnitIndex uint64, data []byte) e
 }
 
 func (ph *PeerHandler) recordUpload(n int) {
+
+	debugs.NumTransferResponseSend++
+	debugs.LogNums()
+
 	now := time.Now()
 
 	ph.mu.Lock()
@@ -433,6 +445,7 @@ func (ph *PeerHandler) recordUpload(n int) {
 }
 
 func (ph *PeerHandler) UploadRate() uint32 {
+
 	cutoff := time.Now().Add(-5 * time.Second)
 
 	ph.mu.Lock()
@@ -456,6 +469,10 @@ func (ph *PeerHandler) UploadRate() uint32 {
 }
 
 func (ph *PeerHandler) recordDownload(n int) {
+
+	debugs.NumTransferResponseReceived++
+	debugs.LogNums()
+
 	now := time.Now()
 
 	ph.mu.Lock()

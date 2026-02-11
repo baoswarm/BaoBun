@@ -10,7 +10,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/baoswarm/baobun/internal/config"
 	"github.com/baoswarm/baobun/pkg/protocol"
+	"github.com/nknorg/ncp-go"
 	nkn "github.com/nknorg/nkn-sdk-go"
 )
 
@@ -88,7 +90,10 @@ func (sm *SessionManager) GetSession(peer protocol.NodeKey) (*Session, error) {
 	}
 
 	conn, err := sm.client.DialWithConfig(string(peer), &nkn.DialConfig{
-		DialTimeout: 5000,
+		DialTimeout: config.DialTimeoutMs,
+		SessionConfig: &ncp.Config{
+			MTU: config.MTU,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -243,13 +248,15 @@ func (sm *SessionManager) ConnectPeer(
 	if handler, exists := swarm.Peers[peerKey]; exists {
 		swarm.mu.RUnlock()
 
+		currentState := handler.GetState()
 		// If already connected, return it
-		if handler.GetState() >= protocol.StateConnected {
+		if currentState >= protocol.StateConnected {
 			return handler, nil
 		}
 
 		// If handshaking, wait for completion
 		if handler.WaitForConnection(timeout) {
+			handler.state = protocol.StateClosed
 			return handler, nil
 		}
 		return nil, fmt.Errorf("connection timeout")

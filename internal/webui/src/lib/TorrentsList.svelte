@@ -53,8 +53,8 @@
           </div>
           <span class="pct">{percent(t)}%</span>
         </div>
-        <div class="rate down">{rate(t.downRate)}</div>
-        <div class="rate up">{rate(t.upRate)}</div>
+        <div class="rate down">{rate(t.upRate)}</div>
+        <div class="rate up">{rate(t.downRate)}</div>
         <div class="peers">{t.peers.length}</div>
         <div class="size">{size(t.fileSize)}</div>
         <div class={stateClass(t.state)}>{t.state}</div>

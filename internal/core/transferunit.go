@@ -37,23 +37,7 @@ type transferUnitRequest struct {
 	Timeout  time.Duration
 }
 
-type transferUnitAvailableEvent struct {
-	peer         protocol.NodeKey
-	transferUnit uint64
-}
-
 type transferUnitCompleteEvent struct {
 	transferUnit uint64
 	data         []byte
-}
-
-type peerUpdateEvent struct {
-	peer     protocol.NodeKey
-	online   bool
-	bitfield Bitfield
-}
-
-type transferUnitRequestEvent struct {
-	transferUnit uint64
-	peer         protocol.NodeKey
 }

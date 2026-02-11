@@ -36,12 +36,12 @@
         </thead>
 
         <tbody>
-          {#each torrent.peers as p}
+          {#each [...torrent.peers].sort((a, b) => a.id.localeCompare(b.id)) as p}
             <tr>
               <td>{p.id}</td>
               <td>{p.state}</td>
-              <td>{rate(p.upRate)}</td>
               <td>{rate(p.downRate)}</td>
+              <td>{rate(p.upRate)}</td>
             </tr>
           {/each}
         </tbody>

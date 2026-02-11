@@ -130,7 +130,7 @@ func (s *Swarm) MarkTransferUnitComplete(transferUnitIndex uint64, data []byte) 
 	// Send HAVE messages to all connected peers
 	s.BroadcastHave(transferUnitIndex)
 
-	log.Println(s.FileIO.haveUnits.ToString(s.File.GetTransferUnitCount()))
+	//log.Println(s.FileIO.haveUnits.ToString(s.File.GetTransferUnitCount()))
 }
 
 // Broadcast HAVE message to all peers
