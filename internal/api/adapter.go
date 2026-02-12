@@ -1,7 +1,11 @@
 // internal/api/adapter.go
 package api
 
-import "github.com/baoswarm/baobun/internal/core"
+import (
+	"fmt"
+
+	"github.com/baoswarm/baobun/internal/core"
+)
 
 type Adapter struct {
 	client *core.Client
@@ -21,13 +25,21 @@ func (a *Adapter) Torrents() []TorrentStatus {
 		uprate := uint32(0)
 
 		record := TorrentStatus{
-			ID:        "id",
+			ID:        fmt.Sprintf("%x", t.InfoHash),
 			Name:      t.File.Name,
 			DownRate:  uint32(downrate),
 			UpRate:    uint32(uprate),
+			Peers:     make([]PeerStatus, 0),
 			State:     mapState(t),
 			FileSize:  t.File.Length,
 			Remaining: t.CalcLeft(),
+			Files: []FileStatus{
+				{
+					Path:      t.File.Name,
+					Length:    t.File.Length,
+					Remaining: t.CalcLeft(),
+				},
+			},
 		}
 
 		for _, p := range t.Peers {

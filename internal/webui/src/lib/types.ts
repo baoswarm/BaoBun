@@ -11,8 +11,15 @@ export interface TorrentStatus {
   downRate: number;   // bytes/sec
   upRate: number;     // bytes/sec
   peers: PeerStatus[];
+  files: FileStatus[];
   state: TorrentState;
   fileSize: number;
+  remaining: number;
+}
+
+export interface FileStatus {
+  path: string;
+  length: number;
   remaining: number;
 }
 
@@ -28,4 +35,9 @@ export interface SeedConfig {
   seedLength: number;
   seedCount: number;
   restartRequired: boolean;
+}
+
+export interface UploadBaoResponse {
+  infoHash: string;
+  name: string;
 }

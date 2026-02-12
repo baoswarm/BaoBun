@@ -7,6 +7,7 @@
     fetchSeedConfig,
     fetchTorrents,
     saveSeedConfig,
+    uploadBao,
   } from "./lib/api";
   import type { SeedConfig, TorrentStatus } from "./lib/types";
   import FileDrop from "./components/FileDrop.svelte";
@@ -20,6 +21,8 @@
   let configError: string | null = null;
   let configMessage: string | null = null;
   let seedConfig: SeedConfig | null = null;
+  let uploadError: string | null = null;
+  let uploadMessage: string | null = null;
   const REFRESH_INTERVAL_MS = 1000;
 
   async function refresh() {
@@ -43,18 +46,36 @@
     return () => clearInterval(id);
   });
 
-  async function handleLoad(event: CustomEvent<{ data: Uint8Array }>) {
-    const res = await fetch("/api/v1/bao", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/octet-stream",
-      },
-      body: event.detail.data.buffer,
-    });
-    //        "X-Filename": encodeURIComponent(file.name),
+  async function handleLoad(
+    event: CustomEvent<{ files: { name: string; data: Uint8Array }[] }>
+  ) {
+    uploadError = null;
+    uploadMessage = null;
 
-    if (!res.ok) {
-      throw new Error("failed to upload file");
+    const files = event.detail.files ?? [];
+    if (files.length === 0) {
+      return;
+    }
+
+    try {
+      const importedIds: string[] = [];
+
+      for (const file of files) {
+        const result = await uploadBao(file.name, file.data);
+        importedIds.push(result.infoHash);
+      }
+
+      await refresh();
+
+      const newest = importedIds[importedIds.length - 1];
+      if (newest) {
+        selected = torrents.find((t) => t.id === newest) ?? selected;
+      }
+
+      uploadMessage = `Imported ${files.length} .bao file(s).`;
+    } catch (err) {
+      uploadError =
+        err instanceof Error ? err.message : "Failed to import dropped file(s)";
     }
   }
 
@@ -133,6 +154,12 @@
   {#if error}
     <p class="error">{error}</p>
   {/if}
+  {#if uploadError}
+    <p class="error">{uploadError}</p>
+  {/if}
+  {#if uploadMessage}
+    <p class="ok">{uploadMessage}</p>
+  {/if}
 
   <div class="list-pane">
     <TorrentList {torrents} bind:selected />
@@ -185,5 +212,9 @@
 
   .error {
     color: var(--red);
+  }
+
+  .ok {
+    color: var(--green);
   }
 </style>

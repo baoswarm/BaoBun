@@ -9,6 +9,18 @@
     if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB/s`;
     return `${(n / 1024 / 1024).toFixed(1)} MB/s`;
   }
+
+  function size(n: number) {
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(2)} KB`;
+    if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(2)} MB`;
+    return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`;
+  }
+
+  function fileProgress(length: number, remaining: number) {
+    if (length === 0) return 0;
+    return Math.round(((length - remaining) / length) * 100);
+  }
 </script>
 
 <div class="details">
@@ -36,7 +48,7 @@
         </thead>
 
         <tbody>
-          {#each [...torrent.peers].sort((a, b) => a.id.localeCompare(b.id)) as p}
+          {#each [...(torrent.peers ?? [])].sort((a, b) => a.id.localeCompare(b.id)) as p}
             <tr>
               <td>{p.id}</td>
               <td>{p.state}</td>
@@ -46,8 +58,29 @@
           {/each}
         </tbody>
       </table>
+    {:else if !torrent.files?.length}
+      <div class="empty">No files found for this torrent</div>
     {:else}
-      <div class="empty">File list not implemented yet</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Path</th>
+            <th>Size</th>
+            <th>Remaining</th>
+            <th>Progress</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each torrent.files ?? [] as f}
+            <tr>
+              <td>{f.path}</td>
+              <td>{size(f.length)}</td>
+              <td>{size(f.remaining)}</td>
+              <td>{fileProgress(f.length, f.remaining)}%</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
     {/if}
   </div>
 </div>

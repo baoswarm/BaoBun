@@ -18,6 +18,17 @@ func (c *Client) ImportBao(path string, fileLocation string) (protocol.InfoHash,
 	return ih, nil
 }
 
+func (c *Client) ImportBaoFile(file *BaoFile, fileLocation string) (protocol.InfoHash, error) {
+	ih := protocol.InfoHash(file.InfoHash)
+
+	swarm := NewSwarm(ih, file, fileLocation)
+
+	c.Swarms[ih] = swarm
+	c.Sessions.RegisterSwarm(swarm)
+
+	return ih, nil
+}
+
 func (c *Client) ImportBaoData(data []byte, fileLocation string) (protocol.InfoHash, error) {
 	file, err := LoadFromBytes(data)
 	if err != nil {

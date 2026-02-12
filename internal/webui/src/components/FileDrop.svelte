@@ -1,7 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher, onMount, onDestroy } from "svelte";
 
-  const dispatch = createEventDispatcher();
+  type DroppedBaoFile = {
+    name: string;
+    data: Uint8Array;
+  };
+
+  const dispatch = createEventDispatcher<{
+    load: { files: DroppedBaoFile[] };
+  }>();
 
   let isDragging = false;
   let error: string | null = null;
@@ -31,19 +38,21 @@
     isDragging = false;
     error = null;
 
-    const file = e.dataTransfer?.files[0];
-    if (!file) return;
-
-    if (!file.name.endsWith(".bao")) {
-      error = "Please drop a valid bao file.";
-      return;
-    }
+    const dropped = Array.from(e.dataTransfer?.files ?? []);
+    if (dropped.length === 0) return;
 
     try {
-      const data = await file.bytes();
-      dispatch("load", { data });
+      const payload: DroppedBaoFile[] = [];
+      for (const file of dropped) {
+        const data = new Uint8Array(await file.arrayBuffer());
+        payload.push({
+          name: file.name,
+          data,
+        });
+      }
+      dispatch("load", { files: payload });
     } catch {
-      error = "Invalid JSON format.";
+      error = "Failed to read dropped file(s).";
     }
   }
 
@@ -66,7 +75,7 @@
 {#if isDragging}
   <div class="overlay">
     <div class="content">
-      <h2>Drop your JSON file</h2>
+      <h2>Drop files to import</h2>
       {#if error}
         <p class="error">{error}</p>
       {/if}

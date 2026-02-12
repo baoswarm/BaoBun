@@ -24,9 +24,16 @@ type TorrentStatus struct {
 	DownRate  uint32       `json:"downRate"` // bytes/sec
 	UpRate    uint32       `json:"upRate"`
 	Peers     []PeerStatus `json:"peers"`
+	Files     []FileStatus `json:"files"`
 	State     TorrentState `json:"state"`
 	FileSize  uint64       `json:"fileSize"`
 	Remaining uint64       `json:"remaining"`
+}
+
+type FileStatus struct {
+	Path      string `json:"path"`
+	Length    uint64 `json:"length"`
+	Remaining uint64 `json:"remaining"`
 }
 
 type PeerStatus struct {
@@ -34,6 +41,11 @@ type PeerStatus struct {
 	State    PeerState `json:"state"`
 	DownRate uint32    `json:"downRate"`
 	UpRate   uint32    `json:"upRate"`
+}
+
+type UploadBaoResponse struct {
+	InfoHash string `json:"infoHash"`
+	Name     string `json:"name"`
 }
 
 type SeedConfigResponse struct {

@@ -6,11 +6,12 @@ import (
 	"os"
 	"path/filepath"
 
+	appconfig "github.com/baoswarm/baobun/internal/config"
 	"github.com/baoswarm/baobun/internal/core"
 )
 
 func main() {
-	trackers := []string{"bao.06b77fc89d2b9785433dd37a9b98a3c8fa37f03db2b2cc0e79be76f87b223d21"}
+	trackers := append([]string(nil), appconfig.DefaultTrackers...)
 
 	inputPath, outputPath, err := resolvePaths()
 	if err != nil {

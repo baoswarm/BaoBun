@@ -61,6 +61,12 @@ Current client mode starts local web endpoints:
 - After restart, partial clients can continue serving units they can prove.
 - For legacy partial data without cached proofs, those units are not advertised for upload until the node has a proof (or completes the full file).
 
+### Drag And Drop Import
+- You can drag and drop one or more files anywhere on the UI.
+- `.bao` files are imported as metadata.
+- Non-`.bao` files are accepted and converted into new swarms automatically.
+- Torrent details `Files` tab now shows file path, size, remaining bytes, and progress.
+
 ## Manual Setup
 Use this if you do not want the auto scripts.
 

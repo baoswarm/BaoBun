@@ -232,6 +232,15 @@ func (s *Swarm) UploadBitfieldBytes() []byte {
 	return out.Bytes()
 }
 
+func (s *Swarm) MarkAllUnitsAvailable() {
+	for i := uint64(0); i < s.FileIO.unitCount; i++ {
+		s.FileIO.haveUnits.Set(i)
+		if s.TransferUnitManager != nil && i < uint64(len(s.TransferUnitManager.transferUnits)) {
+			s.TransferUnitManager.transferUnits[i].State = TransferUnitStateComplete
+		}
+	}
+}
+
 // GetFileIO returns a FileIO instance for a swarm's file
 // func (s *Swarm) GetFileIO(cacheSize int) (*FileIO, error) {
 // 	if s.File == nil {
