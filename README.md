@@ -1,5 +1,6 @@
 # BaoBun
 BaoBun is a headless BaoSwarm client with an embedded web UI.
+
 <img width="256" height="256" alt="baoswarm" src="https://github.com/user-attachments/assets/31b2126d-ea58-40a3-93e7-419bb681f3b2" />
 
 ## Quickstart (Auto Setup + Build)
