@@ -6,13 +6,12 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
 	"path/filepath"
-	"syscall"
 	"time"
 
 	"github.com/baoswarm/baobun/internal/api"
 	"github.com/baoswarm/baobun/internal/core"
+	"github.com/baoswarm/baobun/internal/debugs"
 	nkntransport "github.com/baoswarm/baobun/internal/transport/nkn"
 	"github.com/baoswarm/baobun/internal/webui"
 	"github.com/baoswarm/baobun/pkg/protocol"
@@ -32,35 +31,53 @@ func main() {
 		return
 	}
 
-	core0 := LaunchCore(filepath.Join(cwd, "downloads_0"), "0mmutsimutsimutsimutsimutsimutsi", true)
-	go LaunchWebApp(core0, ":8880")
-	core1 := LaunchCore(filepath.Join(cwd, "downloads_1"), "1mmutsimutsimutsimutsimutsimutsi", true)
-	go LaunchWebApp(core1, ":8881")
-	core2 := LaunchCore(filepath.Join(cwd, "downloads_2"), "2mmutsimutsimutsimutsimutsimutsi", true)
-	go LaunchWebApp(core2, ":8882")
-	core := LaunchCore(filepath.Join(cwd, "downloads"), "immutsimutsimutsimutsimutsimutsi", true)
-	go LaunchWebApp(core, ":8888")
-
-	// Setup signal handling
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-
 	go func() {
-		<-sigs
-		fmt.Println("Shutting down gracefully...")
-
-		core0.Transport.Close()
-		core1.Transport.Close()
-		core2.Transport.Close()
-		core.Transport.Close()
-
-		os.Exit(0)
+		core0 := LaunchCore(filepath.Join(cwd, "downloads_0"), "0mmutsimutsimutsimutsimutsimuts4", true)
+		LaunchWebApp(core0, ":8880")
+	}()
+	go func() {
+		core1 := LaunchCore(filepath.Join(cwd, "downloads_1"), "1mmutsimutsimutsimutsimutsimuts4", true)
+		go LaunchWebApp(core1, ":8881")
+	}()
+	go func() {
+		core2 := LaunchCore(filepath.Join(cwd, "downloads_2"), "2mmutsimutsimutsimutsimutsimuts4", true)
+		go LaunchWebApp(core2, ":8882")
+	}()
+	go func() {
+		core := LaunchCore(filepath.Join(cwd, "downloads"), "immutsimutsimutsimutsimutsimuts4", true)
+		go LaunchWebApp(core, ":8888")
 	}()
 
-	defer core0.Transport.Close()
-	defer core1.Transport.Close()
-	defer core2.Transport.Close()
-	defer core.Transport.Close()
+	debugDumpTicker := time.NewTicker(time.Second)
+	go func() {
+		for {
+			select {
+			case <-debugDumpTicker.C:
+				debugs.DumpLog()
+			}
+		}
+	}()
+
+	// Setup signal handling
+	// sigs := make(chan os.Signal, 1)
+	// signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	// go func() {
+	// 	<-sigs
+	// 	fmt.Println("Shutting down gracefully...")
+
+	// 	core0.Transport.Close()
+	// 	core1.Transport.Close()
+	// 	core2.Transport.Close()
+	// 	core.Transport.Close()
+
+	// 	os.Exit(0)
+	// }()
+
+	// defer core0.Transport.Close()
+	// defer core1.Transport.Close()
+	// defer core2.Transport.Close()
+	// defer core.Transport.Close()
 
 	select {} // block forever
 }
@@ -128,6 +145,7 @@ func LaunchCore(downloadsLocation string, seed string, loadTest bool) *core.Clie
 			}
 		}
 	}()
+
 	return coreClient
 }
 

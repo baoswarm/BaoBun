@@ -4,6 +4,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/baoswarm/baobun/internal/config"
 	"github.com/baoswarm/baobun/pkg/protocol"
 )
 
@@ -89,7 +90,7 @@ func (s *Swarm) CalcLeft() uint64 {
 			continue
 		}
 
-		transferUnitLen := uint64(s.File.TransferSize)
+		transferUnitLen := uint64(config.TransferUnitSize)
 		offset := i * transferUnitLen
 
 		if offset >= s.File.Length {
