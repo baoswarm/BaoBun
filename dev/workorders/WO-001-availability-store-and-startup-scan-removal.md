@@ -7,12 +7,12 @@
 - `updates_index`: `required after every completed component`
 
 ## Objective
-Replace startup non-zero byte scanning as the primary availability source with persisted availability and proof metadata, while preserving a one-time migration path for legacy data.
+Replace startup non-zero byte scanning as the primary availability source with persisted availability and proof metadata, ~~while preserving a one-time migration path for legacy data.~~ we do not care for legacy migration nor backwards compatibility, since this is entirely new.
 
 ## In Scope
 - New persisted availability store per swarm.
 - Startup load path that prioritizes persisted availability and proofs.
-- Legacy one-time fallback scan only when persisted availability is missing.
+- ~~Legacy one-time fallback scan only when persisted availability is missing.~~
 - Proof-authoritative availability reconciliation for incomplete files.
 - Optional repair mode via `BAOBUN_REPAIR_AVAILABILITY=1`.
 - Atomic persistence semantics.
@@ -71,7 +71,7 @@ Replace startup non-zero byte scanning as the primary availability source with p
     - initialize `FileIO.haveUnits` from persisted `have_units`.
     - reconcile `proven_units` against loaded proofs.
   - If missing/invalid store:
-    - run legacy byte scan once.
+    ~~- run legacy byte scan once.~~
     - for incomplete files, intersect with proven units:
       - `effectiveHave = scannedHave ∩ provenHave`
     - for complete files, allow all units.
