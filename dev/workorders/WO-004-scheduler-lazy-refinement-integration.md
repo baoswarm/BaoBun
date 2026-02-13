@@ -7,13 +7,13 @@
 - `updates_index`: `required after every completed component`
 
 ## Objective
-Refactor scheduling so downloads are selected coarse-first and refined on demand, instead of globally scanning random T1 units, while preserving throughput and compatibility behavior.
+Refactor scheduling so downloads are selected coarse-first and refined on demand, instead of globally scanning random T1 units, while preserving throughput ~~and compatibility behavior.~~
 
 ## In Scope
 - Transfer scheduling integration with tier summaries and refinement responses.
 - Per-peer refinement in-flight tracking with timeout/retry.
 - Candidate generation from refined windows.
-- Compatibility path for legacy peers (direct T1 behavior).
+- ~~Compatibility path for legacy peers (direct T1 behavior).~~
 
 ## Out Of Scope
 - Long-form benchmarks/docs and release notes (WO-005).
@@ -53,7 +53,7 @@ Refactor scheduling so downloads are selected coarse-first and refined on demand
   - stage 2: trigger refinement request for chosen block if T1 detail unavailable.
   - stage 3: once refined response arrives, schedule T1 requests from that window.
 - Keep existing per-peer/max-active request caps.
-- Preserve legacy peer behavior by bypassing refinement and using current T1 path.
+- ~~Preserve legacy peer behavior by bypassing refinement and using current T1 path.~~
 
 #### Success State
 - Scheduler no longer depends on full global random T1 scan for capable peers.
@@ -94,8 +94,8 @@ Refactor scheduling so downloads are selected coarse-first and refined on demand
 - After completion, set WO-004 Component 4 status in `dev/workorders/index.md` to `completed` and add completion date + commit hash.
 
 ## Acceptance Criteria
-- For capable peers, download flow is coarse selection -> refinement -> T1 requests.
-- For legacy peers, behavior remains equivalent to current T1 scheduling.
+- ~~For capable peers,~~ download flow is coarse selection -> refinement -> T1 requests.
+- ~~For legacy peers, behavior remains equivalent to current T1 scheduling.~~
 - Refinement timeouts and retries do not stall swarm progress.
 
 ## Validation Plan
