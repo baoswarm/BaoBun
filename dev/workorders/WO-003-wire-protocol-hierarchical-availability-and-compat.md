@@ -7,13 +7,15 @@
 - `updates_index`: `required after every completed component`
 
 ## Objective
-Add hierarchical availability messages and capability negotiation to the peer protocol while preserving compatibility with legacy peers that only speak flat T1 bitfield/HAVE behavior.
+~~Add hierarchical availability messages and capability negotiation to the peer protocol while preserving compatibility with legacy peers that only speak flat T1 bitfield/HAVE behavior.~~
+All of this is enforced in the protocol level, is constant, and there is no need for backwards compatibility.
+Any deviation from this will fork from the BaoSwarm and will be regarded as incompatible.
 
 ## In Scope
 - Protocol message additions for summaries and refinement requests/responses.
-- Handshake capability negotiation fields.
+~~- Handshake capability negotiation fields.~~
 - Serializer and message model updates.
-- Session and peer handler behavior updates for downgrade compatibility.
+~~- Session and peer handler behavior updates for downgrade compatibility.~~
 
 ## Out Of Scope
 - Scheduler refinement strategy and candidate selection policy.
@@ -55,7 +57,7 @@ Add hierarchical availability messages and capability negotiation to the peer pr
 
 #### Success State
 - New schema compiles and generated files are in sync.
-- Existing payloads remain backward compatible.
+~~- Existing payloads remain backward compatible.~~
 
 #### Index Update Requirement
 - After completion, set WO-003 Component 1 status in `dev/workorders/index.md` to `completed` and add completion date + commit hash.
@@ -65,14 +67,15 @@ Add hierarchical availability messages and capability negotiation to the peer pr
 - Update `pkg/protocol/p2p.go` to include:
   - new message types
   - new payload structs
-  - extended handshake struct fields
+  ~~- extended handshake struct fields~~
 - Extend serializer interface in `internal/core/serializer.go`:
   - marshal/unmarshal methods for each new payload.
 - Implement protobuf serializer support in `internal/core/protobuf.serializer.go`.
 - Implement JSON serializer parity in `internal/core/json_serializer.go` for test/dev completeness.
-
+_  ^ Note: with regards to JSON serializer and also the serialization abstraction, im fine with simplifying here, and removing the abstraction and JSON iplm entirely. 
+_
 #### Success State
-- All serializers can encode/decode new message types and extended handshake fields.
+- All serializers can encode/decode new message types ~~and extended handshake fields.~~
 - Build passes without interface mismatch.
 
 #### Index Update Requirement
@@ -81,15 +84,19 @@ Add hierarchical availability messages and capability negotiation to the peer pr
 ### Component 3: Session Handshake Capability Negotiation
 #### Implementation Directive
 - In `internal/core/session_manager.go` and `internal/core/p2p_handler.go`:
-  - send extended handshake capabilities.
-  - record peer capabilities on handshake receipt.
-  - if peer does not support hierarchical availability, mark as legacy mode.
-- Preserve current connect/handshake state transitions.
-- Avoid breaking peers compiled against the old protocol.
+  ~~- send extended handshake capabilities.~~
+  ~~- record peer capabilities on handshake receipt.~~
+  ~~- if peer does not support hierarchical availability, mark as legacy mode.~~
+~~- Preserve current connect/handshake state transitions.~~
+~~- Avoid breaking peers compiled against the old protocol.~~
 
 #### Success State
-- New peers negotiate hierarchical availability successfully.
-- Legacy peers still connect and exchange data via existing T1 flow.
+~~- New peers negotiate hierarchical availability successfully.~~
+~~- Legacy peers still connect and exchange data via existing T1 flow.~~
+- Have messages are requested and responded to in the T1, T2, T3 hierarchical fashion
+  ^  Note1: should we also consider some kind of runtime length encoding, especially in sequential download modes this could be useful
+  ^  Note2: should we also consider HaveNone and HaveFull sort of capabilities so we dont have to send bitfields at all in these special cases?
+  (In theory if a peer is marked as seeder you can always assume they have the full range of data available but that doesnt guarantee we always know this during the handshake, also in that case if we receive a HaveFull, we should also promote the leech top seeder if its not already).
 
 #### Index Update Requirement
 - After completion, set WO-003 Component 3 status in `dev/workorders/index.md` to `completed` and add completion date + commit hash.
@@ -100,33 +107,33 @@ Add hierarchical availability messages and capability negotiation to the peer pr
   - on connection with capable peer:
     - send T3 summary first
     - defer T2/T1 details unless requested.
-  - for legacy peers:
-    - keep current bitfield/HAVE path unchanged.
+  ~~- for legacy peers:~~
+   - ~~keep current bitfield/HAVE path unchanged.~~
 - In `internal/core/swarm.go`, expose helper methods used by handler:
   - summary extraction by tier windows
   - refinement response generation for requested tier/index.
 
 #### Success State
-- Capable peers exchange coarse summaries first.
-- Legacy peers observe no behavior changes from their perspective.
+- ~~Capable~~ peers exchange coarse summaries first.
+- ~~Legacy peers observe no behavior changes from their perspective.~~
 
 #### Index Update Requirement
 - After completion, set WO-003 Component 4 status in `dev/workorders/index.md` to `completed` and add completion date + commit hash.
 
 ## Acceptance Criteria
-- New<->new peer handshake negotiates hierarchical capability and can exchange tier summaries.
-- New<->old peer path downgrades to T1 bitfield/HAVE with no connection failures.
+- ~~New<->new peer handshake negotiates hierarchical capability and can~~ exchange tier summaries.
+- ~~New<->old peer path downgrades to T1 bitfield/HAVE with no connection failures.~~
 - Wire changes are contained to protocol + serializers + handler/session integration points.
 
 ## Validation Plan
 - Add targeted protocol tests (WO-005) but verify compile/runtime smoke now:
   - start two new peers and confirm summary messages observed in logs.
-  - connect new peer to legacy build and confirm fallback behavior.
+ - ~~connect new peer to legacy build and confirm fallback behavior.~~
 
 ## Risks
 - Protocol drift if generated files are stale.
-- Silent fallback bugs if capability flags are not persisted in handler state.
+- ~~Silent fallback bugs if capability flags are not persisted in handler state.~~
 
 ## Rollback Plan
-- Guard hierarchical behavior behind negotiated capability; if issues occur, force legacy path while retaining protocol fields.
+- ~~Guard hierarchical behavior behind negotiated capability; if issues occur, force legacy path while retaining protocol fields.~~
 
