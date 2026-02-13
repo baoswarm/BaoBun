@@ -63,13 +63,13 @@ Deliver complete validation, performance evidence, and operational documentation
 ### Component 3: Protocol Compatibility Tests
 #### Implementation Directive
 - Add tests in `internal/core/protocol_compat_test.go` for:
-  - new<->new capability negotiation
-  - new<->legacy fallback behavior
+  - ~~new<->new capability negotiation~~
+  - ~~new<->legacy fallback behavior~~
   - payload serialization round-trip for new message types
-- Validate handlers do not crash when fields are missing in legacy payloads.
+- ~~Validate handlers do not crash when fields are missing in legacy payloads.~~
 
 #### Success State
-- Compatibility guarantees are enforced by automated tests.
+- ~~Compatibility guarantees are enforced by automated tests.~~
 
 #### Index Update Requirement
 - After completion, set WO-005 Component 3 status in `dev/workorders/index.md` to `completed` and add completion date + commit hash.
@@ -78,7 +78,7 @@ Deliver complete validation, performance evidence, and operational documentation
 #### Implementation Directive
 - Add scheduler/integration tests in `internal/core/scheduler_refinement_test.go`.
 - Add benchmarks in `internal/core/startup_benchmark_test.go`:
-  - metadata startup vs legacy scan startup
+  - metadata startup ~~vs legacy scan startup~~
   - memory use proxy for peer availability state scale
 - Provide reproducible benchmark command examples in `README.md`.
 
@@ -93,9 +93,9 @@ Deliver complete validation, performance evidence, and operational documentation
 #### Implementation Directive
 - Update `README.md` with:
   - architecture summary of proof store + availability store + tiers
-  - migration behavior for existing nodes
+  - ~~migration behavior for existing nodes~~
   - repair mode usage (`BAOBUN_REPAIR_AVAILABILITY=1`)
-  - compatibility expectations across mixed-version peers
+  - ~~compatibility expectations across mixed-version peers~~
   - troubleshooting flow for proof/availability mismatch
 - Align section names with existing README structure.
 
@@ -107,7 +107,7 @@ Deliver complete validation, performance evidence, and operational documentation
 
 ## Acceptance Criteria
 - Complete automated test suite covers functional and compatibility goals.
-- Benchmarks demonstrate startup-time improvement over legacy scan behavior.
+- ~~Benchmarks demonstrate startup-time improvement over legacy scan behavior.~~
 - Documentation is sufficient for operation and development handoff.
 
 ## Risks
@@ -115,5 +115,6 @@ Deliver complete validation, performance evidence, and operational documentation
 - Benchmark noise without stable fixture sizing.
 
 ## Rollback Plan
-- If regressions occur, gate hierarchical/refinement paths with feature flags and keep persistence protections from WO-001 active.
+- ~~If regressions occur, gate hierarchical/refinement paths with feature flags and keep persistence protections from WO-001 active.~~
+- Nothing to rollback to, this is an essential protocol implementation detail, there is no legacy, only to be discarded placeholder implementation.
 
